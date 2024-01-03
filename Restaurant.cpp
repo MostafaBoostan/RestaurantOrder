@@ -15,8 +15,9 @@ using namespace std;
 
 
 struct foods{
-    int number_type_food;
-    int number_food;
+    int id_order = 0;
+    int number_type_food = 0;
+    int number_food = 0;
     struct foods *pfnext = NULL;
 };
 
@@ -34,7 +35,7 @@ struct order* loading();
 void first_menu();
 void food_menu();
 struct order* new_order(struct order*);
-void foods_new_order(struct foods**);
+void foods_new_order(struct foods**, int);
 void order_deliver(struct order*);
 void cancle(struct order*);
 void change_order(struct order*);
@@ -49,33 +50,63 @@ int main(){
 
 //load kardan tamam data ha az file dar linklist.
 struct order* loading(){
-    FILE *file_order;
-    struct order* pohead = NULL;
-    struct order* potemp = NULL;
-    struct order* ponew = NULL;
-    file_order = fopen("order_data.bin", "rb");
-    //agar file nabashad mipare biroon va adres null barmigardad.
-    if(file_order == NULL){
-        return pohead;
+    int i = 1;
+    FILE *order_file, *food_file;
+    struct order *pohead = NULL, *potemp, *ponext;
+    struct foods *pfhead = NULL, *pftemp, *pfnext;
+    order_file = fopen("order.bin", "rb");
+    if(order_file == NULL){
+        return NULL;
     }
-    else{
-        //avalin khone vared mishavad.
-        pohead = new struct order;
-        fread(pohead, sizeof(struct order), 1, file_order);
-        potemp = pohead;
-        //bad az avalin khone betartib data ha vared mishavad va load mishavad dar ram.
-        while(1){
-            ponew = new struct order;
-            if(fread(ponew, sizeof(struct order), 1, file_order) > 0){
-                potemp->ponext = ponew;
-                potemp = ponew;
-            }
-            else{
-                free(ponew);
-                return pohead;
-            }
+
+    ponext = new struct order;
+    while(fread(ponext, sizeof(struct order), 1, order_file) > 0){
+        ponext->pfhead = NULL;
+        if(pohead == NULL){
+            potemp = pohead = ponext;
         }
+        potemp = ponext;
+        ponext = new struct order; 
+        potemp->ponext = ponext;
     }
+    potemp->ponext = NULL;
+    free(ponext);
+    fclose(order_file);
+
+    food_file = fopen("food.bin", "rb");
+    pfnext = new struct foods;
+    potemp = pohead;
+    while(1){
+        
+        if(fread(pfnext, sizeof(struct foods), 1, order_file) <= 0){
+            pftemp->pfnext = NULL;
+            free(pfnext);
+            break;
+        }
+
+        if(pfnext->id_order != i){
+            pftemp->pfnext = NULL;
+            i++;
+            //order yedoone mire jelo
+            potemp = potemp->ponext;
+        }
+
+        if(potemp->pfhead == NULL){
+            potemp->pfhead = pfnext;
+            pftemp = pfhead = pfnext;
+        }
+        
+        pftemp = pfnext;
+        pfnext = new struct foods;
+        pftemp->pfnext = pfnext;
+    }
+
+
+
+
+
+    return pohead;
+
 }
 
 //sakht va namayehs avalin safhe namayesh.
@@ -147,8 +178,11 @@ void food_menu(){
 
 //ezafe kardan sefaresh jadid
 struct order* new_order(struct order* pohead){
+    FILE *order_file;
+    order_file = fopen("order.bin", "wb");
     struct order *potemp, *ponew;
-    int choise = 3, i = 1;
+    int choise = 3;
+    static int i =1;
 
     ponew = new struct order;
     //kamel kardan shomare daneshjoyi
@@ -216,33 +250,49 @@ struct order* new_order(struct order* pohead){
         printf(BLUE"Your family is: %s\n"RESET, ponew->family);
         printf(BLUE"Please enter your choise: "RESET);
         scanf("%d",& choise);
-        //sakht order jadid
-        potemp = pohead;
-        if(potemp == NULL){
-            ponew->number_order = 1;
-            pohead = ponew;
-        }
-        else{
-            while(potemp->ponext != NULL){
-            potemp->number_order = i;
-            potemp = potemp->ponext;
-            i++;
-            }
-            ponew->number_order = i;
-            potemp->ponext = ponew;
-        }
-        
+
         switch(choise){
             case 1:
-                foods_new_order(& pohead->pfhead);
-                system("cls || clear");
-                printf("\n"GREEN"Your order has been successfully placed."RESET);
-                usleep(3000000);
+                //sakht order jadid
+                potemp = pohead;
+                if(potemp == NULL){
+                    ponew->number_order = 1;
+                    pohead = ponew;
+                }
+                else{
+                    while(potemp->ponext != NULL){
+                        potemp = potemp->ponext;
+                    }
+                    potemp->ponext = ponew;
+                    i++;
+                    ponew->number_order = i;
+                }
+
+                foods_new_order(&ponew->pfhead, i);
+
+                if(ponew->pfhead == NULL){
+                    free(ponew);
+                    system("cls || clear");
+                    printf("\n"RED"Your order was not registered. To register, you must order at least 1 dish."RESET);
+                    usleep(3000000);
+                }
+                else{
+                    //neveshtan order ha dar file.
+                    potemp = pohead;
+                    while(potemp != NULL){
+                        fwrite(potemp, sizeof(struct order), 1, order_file);
+                        potemp = potemp->ponext;
+                    }
+                    fclose(order_file);
+                    system("cls || clear");
+                    printf("\n"GREEN"Your order has been successfully placed."RESET);
+                    usleep(3000000);
+                }
                 return pohead;
                 break;
             case 2:
                 system("cls || clear");
-                printf("\n"GREEN"Your order has been successfully placed. but you dant have any food."RESET);
+                printf("\n"RED"Your order was not registered. To register, you must order at least 1 dish."RESET);
                 usleep(3000000);
                 return pohead;
                 break;
@@ -255,8 +305,10 @@ struct order* new_order(struct order* pohead){
 }
 
 //neshoon daden menu va entekhab ghaza ha baraye avalin bar
-void foods_new_order(struct foods** pfhead){
+void foods_new_order(struct foods** pfhead, int i){
     int temp_type_food = 0;
+    FILE *food_file;
+    food_file = fopen("food.bin", "ab");
     struct foods *pftemp;
     system("cls || clear");
     printf(YELLOW"* * * * * * * * * * * * * * * *"RESET"\n");
@@ -297,6 +349,7 @@ void foods_new_order(struct foods** pfhead){
             printf(BLUE"Food number %d is selected\n"RESET, pfnew->number_type_food);
             printf(BLUE"Please enter the number of meals you want of this type: "RESET);
             scanf("%d",& pfnew->number_food);
+            pfnew->id_order = i;
             pftemp = *pfhead;
             if(pftemp == NULL){
                 *pfhead = pfnew;
@@ -307,15 +360,18 @@ void foods_new_order(struct foods** pfhead){
                 }
                 pftemp->pfnext = pfnew;
             }
+            //write kardan ghazaha dar file
+            fwrite(pfnew, sizeof(struct foods), 1, food_file);
+            fclose(food_file);
             system("cls || clear");
             printf("\n"GREEN"Your order has been successfully placed."RESET);
             usleep(3000000);
-            foods_new_order(pfhead);
+            foods_new_order(pfhead, i);
             break;
         default:
             system("cls || clear");
             printf("\n"RED"The entered number is not valid. Please enter one of the options correctly."RESET);
             usleep(3000000);
-            foods_new_order(pfhead);
+            foods_new_order(pfhead, i);
     }
 }    
