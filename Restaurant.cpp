@@ -214,7 +214,7 @@ struct order* new_order(struct order* pohead){
         printf(BLUE"Your student nuber is: %d\n"RESET, ponew->number_std);
         printf(BLUE"Your name is: %s\n"RESET, ponew->name);
         printf(BLUE"Your family is: %s\n"RESET, ponew->family);
-        printf(BLUE"Please enter your choise (exit: 0): "RESET);
+        printf(BLUE"Please enter your choise: "RESET);
         scanf("%d",& choise);
         //sakht order jadid
         potemp = pohead;
