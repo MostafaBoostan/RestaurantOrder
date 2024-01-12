@@ -51,7 +51,7 @@ void food_menu();
 struct order* new_order(struct order*);
 void foods_new_order(struct foods**, int, int);
 void order_deliver(struct order*);
-void cancle_order(struct order*);
+void cancel_order(struct order*);
 void change_order(struct order*);
 void delete_food(struct order*, struct order*);
 void change_food(struct order*, struct order*);
@@ -131,7 +131,7 @@ void first_menu(){
     printf(YELLOW"*"RESET"                 "GREEN"Menu (1"RESET"     "YELLOW"*"RESET"\n");
     printf(YELLOW"*"RESET"            "GREEN"New order (2"RESET"     "YELLOW"*"RESET"\n");
     printf(YELLOW"*"RESET"      "GREEN"Order delivered (3"RESET"     "YELLOW"*"RESET"\n");
-    printf(YELLOW"*"RESET"         "GREEN"Cancle order (4"RESET"     "YELLOW"*"RESET"\n");
+    printf(YELLOW"*"RESET"         "GREEN"Cancel order (4"RESET"     "YELLOW"*"RESET"\n");
     printf(YELLOW"*"RESET"         "GREEN"Change order (5"RESET"     "YELLOW"*"RESET"\n");
     printf(YELLOW"*"RESET"               "GREEN"Review (6"RESET"     "YELLOW"*"RESET"\n");
     printf(YELLOW"*"RESET"                 "GREEN"Exit (7"RESET"     "YELLOW"*"RESET"\n");
@@ -151,7 +151,7 @@ void first_menu(){
             order_deliver(pohead);
             break;    
         case 4:
-            cancle_order(pohead);
+            cancel_order(pohead);
             break;
         case 5:
             change_order(pohead);
@@ -546,8 +546,8 @@ void order_deliver(struct order *pohead){
     }
 }
 
-//cancle kardan order
-void cancle_order(struct order *pohead){
+//cancel kardan order
+void cancel_order(struct order *pohead){
     FILE *order_file;
     int number_std_search, choise = 3;
     struct order *potemp;
@@ -580,7 +580,7 @@ void cancle_order(struct order *pohead){
                     new_order(pohead);
                     break;
                 case 2:
-                    cancle_order(pohead); 
+                    cancel_order(pohead); 
                     break;
                 case 3:
                     first_menu(); 
@@ -614,7 +614,7 @@ void cancle_order(struct order *pohead){
                         new_order(pohead);
                         break;
                     case 2:
-                        cancle_order(pohead); 
+                        cancel_order(pohead); 
                         break;
                     case 3:
                         first_menu(); 
@@ -630,12 +630,12 @@ void cancle_order(struct order *pohead){
         else{
             while(choise != 1 || choise != 2){
                 system("cls || clear");
-                printf(GREEN"The order was successfully cancled"RESET"\n\n");
+                printf(GREEN"The order was successfully cancelled"RESET"\n\n");
                 printf(YELLOW"*"RESET"  "MAGENTA"studetn number > %d \n"RESET, potemp->number_std);
                 printf(YELLOW"*"RESET"        "MAGENTA"order id > %d \n"RESET, potemp->number_order);
                 printf(YELLOW"*"RESET"            "MAGENTA"name > %s \n"RESET, potemp->name);
                 printf(YELLOW"*"RESET"          "MAGENTA"family > %s \n"RESET, potemp->family);
-                printf(YELLOW"*"RESET"       "MAGENTA"situation > cancle "RESET"\n");
+                printf(YELLOW"*"RESET"       "MAGENTA"situation > Cancel "RESET"\n");
                 printf(YELLOW"*"RESET"               "RED"1 > Back "RESET"\n");
                 printf(YELLOW"*"RESET"               "RED"2 > Home page "RESET"\n");
                 printf("\n");
@@ -652,7 +652,7 @@ void cancle_order(struct order *pohead){
                 scanf("%d",& choise);
                 switch (choise){
                     case 1:
-                        cancle_order(pohead);
+                        cancel_order(pohead);
                         break;
                     case 2:
                         first_menu();
@@ -721,7 +721,7 @@ void change_order(struct order *pohead){
             while(choise != 1 || choise != 2){
                 system("cls || clear");
                 printf(YELLOW"* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *"RESET"\n");
-                printf(YELLOW"*"RESET"     "RED"Your order has already been deliverded or cancled."RESET"    "YELLOW"*"RESET"\n");
+                printf(YELLOW"*"RESET"    "RED"Your order has already been deliverded or cancelled."RESET"   "YELLOW"*"RESET"\n");
                 printf(YELLOW"*"RESET"                                                           "YELLOW"*"RESET"\n");
                 printf(YELLOW"*"RESET"                      "GREEN"Add new order (1"RESET"                     "YELLOW"*"RESET"\n");
                 printf(YELLOW"*"RESET"                          "GREEN"Back (2"RESET"                          "YELLOW"*"RESET"\n");
@@ -1053,7 +1053,7 @@ void review(struct order* pohead){
             strcpy(situation, "Delivered");
         }
         else if(potemp->situation == CANCLE){
-            strcpy(situation, "Cancle");
+            strcpy(situation, "Cancel");
         }
         printf("   "MAGENTA"studetn number > %d \n"RESET, potemp->number_std);
         printf("         "MAGENTA"order id > %d \n"RESET, potemp->number_order);
